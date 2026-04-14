@@ -136,7 +136,8 @@ pre-configure:
 post-configure:
 	${REINPLACE_CMD} '/^CFLAGS =/s/$$/ -fPIC/' \
 	 	${WRKSRC}/src/plugins/auth-pam/Makefile \
-	 	${WRKSRC}/src/plugins/down-root/Makefile
+	 	${WRKSRC}/src/plugins/down-root/Makefile && \
+	(cd ${WRKSRC}/sample/sample-keys && ./gen-sample-keys.sh)
 
 # sanity check that we don't inherit incompatible SSL libs through,
 # for instance, pkcs11-helper:
