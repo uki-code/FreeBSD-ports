@@ -90,12 +90,11 @@ NO_BUILD=	yes
 
 CONFLICTS=	pfSense-vmware-[0-9]*
 
-USE_GITLAB=	yes
-GL_SITE=	https://gitlab.netgate.com
-GL_ACCOUNT=	pfSense
-GL_PROJECT=	${PFSENSE_SRC_REPO}
-GL_COMMIT=	${PFSENSE_COMMITHASH}
-MASTER_SITE_BACKUP=
+# --- Closed-source repackaging: fetch the pre-built .pkg instead of source ---
+MASTER_SITES=	${EXT_PKG_CACHE_URL}/pfsense/pkgs/
+DISTFILES=		${PORTNAME}-${DISTVERSION}.pkg
+EXTRACT_ONLY=
+
 NO_CHECKSUM=yes
 
 SUB_FILES=	pkg-post-install
@@ -113,12 +112,37 @@ RUN_DEPENDS+=	dmidecode>=0:sysutils/dmidecode \
 		devcpu-data>=0:sysutils/devcpu-data
 .endif
 
+# --- Closed-source repackaging: extract pre-built .pkg ---
+do-extract:
+	@${MKDIR} ${PKGROOT}
+	cd ${PKGROOT} && ${TAR} xf \
+		${DISTDIR}/${DISTFILES} \
+		--exclude='+*'
+
+# --- Closed-source repackaging: re-pack pre-built .pkg ---
 do-install:
-	(cd ${WRKSRC}/src && ${COPYTREE_SHARE} "etc usr" ${STAGEDIR})
-	${ECHO} "${PRODUCT_NAME}" > ${STAGEDIR}/etc/platform
-	${ECHO} ${PORTREVISION} > ${STAGEDIR}/etc/version.patch
-	${ECHO} "${PFSENSE_COMMITHASH}" > ${STAGEDIR}/etc/version.lastcommit
-	${ECHO} "${PFSENSE_DATESTRING}" > ${STAGEDIR}/etc/version.buildtime
-	${MKDIR} "${STAGEDIR}/cf/conf"
+	# /usr/local -> ${PREFIX}
+	if [ -d ${PKGROOT}/usr/local ]; then \
+		cd ${PKGROOT}/usr/local && \
+	        ${COPYTREE_SHARE} . ${STAGEDIR}${PREFIX}; \
+	fi
+
+	# /usr/share -> /usr/share
+	if [ -d ${PKGROOT}/usr/share ]; then \
+		cd ${PKGROOT}/usr/share && \
+	        ${COPYTREE_SHARE} . ${STAGEDIR}/usr/share; \
+	fi
+
+	# /etc
+	if [ -d ${PKGROOT}/etc ]; then \
+		cd ${PKGROOT}/etc && \
+	        ${COPYTREE_SHARE} . ${STAGEDIR}/etc; \
+	fi
+
+	# /cf (pfSense-specific root)
+	if [ -d ${PKGROOT}/cf ]; then \
+		cd ${PKGROOT}/cf && \
+	        ${COPYTREE_SHARE} . ${STAGEDIR}/cf; \
+	fi
 
 .include <bsd.port.post.mk>
