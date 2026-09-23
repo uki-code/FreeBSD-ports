@@ -1,0 +1,13 @@
+UKI's cloud-init fork, built for pfSense images.
+
+Based on upstream cloud-init (https://cloud-init.io/) with added support for
+pfSense as a distro (cloudinit/distros/pfsense.py, config.xml-based user/
+group/password/hostname management) and as a network renderer
+(cloudinit/net/pfsense.py, reconciles cloud-init's desired interfaces into
+config.xml's <interfaces> without disturbing manually-added config).
+
+Packaged separately from the real net/cloud-init port under a distinct name
+(cloud-init-uki) to avoid pkg repo-priority ambiguity if both are ever
+configured on the same box.
+
+WWW: https://github.com/uki-code/cloud-init
