@@ -1,0 +1,13 @@
+[
+{ type: install
+  message: <<EOM
+To enable cloud-init at boot, add the following to /etc/rc.conf:
+
+    cloudinit_enable="YES"
+
+The default config is installed as %%PREFIX%%/etc/cloud/cloud.cfg.sample --
+copy or symlink it to cloud.cfg (without .sample) to activate it, or provide
+your own. See %%PREFIX%%/etc/cloud/cloud.cfg.d/ for drop-in overrides.
+EOM
+}
+]
